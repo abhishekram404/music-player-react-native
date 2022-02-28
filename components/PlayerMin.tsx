@@ -30,6 +30,16 @@ export default function PlayerMin() {
     await setActiveSong(songs[(await currentSongIndex()) + 1]);
   };
 
+  const prevSong = async () => {
+    const currentSongIndex = async () => await songs.indexOf(activeSong);
+
+    if ((await currentSongIndex()) === 0) {
+      await setActiveSong(songs[songs.length - 1]);
+      return;
+    }
+
+    await setActiveSong(songs[(await currentSongIndex()) - 1]);
+  };
   const playPause = async () => {
     const status = await sound.current.getStatusAsync();
 
@@ -74,6 +84,7 @@ export default function PlayerMin() {
             size={24}
             color="black"
             style={styles.icon}
+            onPress={prevSong}
           />
           {isPlaying ? (
             <MaterialIcons
