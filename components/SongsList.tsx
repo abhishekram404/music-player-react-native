@@ -1,141 +1,70 @@
-import { View, Text, VirtualizedList } from "react-native";
-import React from "react";
+import { View, Text, VirtualizedList, Alert } from "react-native";
+import React, { useEffect, useState } from "react";
 import uuid from "react-native-uuid";
 import SongListItem from "./SongListItem";
+import * as MediaLibrary from "expo-media-library";
 
 export default function SongsList() {
-  const data = [
-    {
-      name: "Song 1",
-      key: uuid.v4(),
-    },
-    {
-      name: "Song 1",
-      key: uuid.v4(),
-    },
-    {
-      name: "Song 1",
-      key: uuid.v4(),
-    },
-    {
-      name: "Song 1",
-      key: uuid.v4(),
-    },
-    {
-      name: "Song 1",
-      key: uuid.v4(),
-    },
-    {
-      name: "Song 1",
-      key: uuid.v4(),
-    },
-    {
-      name: "Song 1",
-      key: uuid.v4(),
-    },
-    {
-      name: "Song 1",
-      key: uuid.v4(),
-    },
-    {
-      name: "Song 1",
-      key: uuid.v4(),
-    },
-    {
-      name: "Song 1",
-      key: uuid.v4(),
-    },
-    {
-      name: "Song 1",
-      key: uuid.v4(),
-    },
-    {
-      name: "Song 1",
-      key: uuid.v4(),
-    },
-    {
-      name: "Song 1",
-      key: uuid.v4(),
-    },
-    {
-      name: "Song 1",
-      key: uuid.v4(),
-    },
-    {
-      name: "Song 1",
-      key: uuid.v4(),
-    },
-    {
-      name: "Song 1",
-      key: uuid.v4(),
-    },
-    {
-      name: "Song 1",
-      key: uuid.v4(),
-    },
-    {
-      name: "Song 1",
-      key: uuid.v4(),
-    },
-    {
-      name: "Song 1",
-      key: uuid.v4(),
-    },
-    {
-      name: "Song 1",
-      key: uuid.v4(),
-    },
-    {
-      name: "Song 1",
-      key: uuid.v4(),
-    },
-    {
-      name: "Song 1",
-      key: uuid.v4(),
-    },
-    {
-      name: "Song 1",
-      key: uuid.v4(),
-    },
-    {
-      name: "Song 1",
-      key: uuid.v4(),
-    },
-    {
-      name: "Song 1",
-      key: uuid.v4(),
-    },
-    {
-      name: "Song 1",
-      key: uuid.v4(),
-    },
-    {
-      name: "Song 1",
-      key: uuid.v4(),
-    },
-  ];
+  const [data, setData] = useState([]);
 
-  const getItem = (data: [{ name: string; key: string }], index: number) =>
+  const getAudioFiles = async () => {
+    let media = await MediaLibrary.getAssetsAsync({ mediaType: "audio" });
+
+    media = await MediaLibrary.getAssetsAsync({
+      mediaType: "audio",
+      first: media.totalCount,
+    });
+    setData(media.assets);
+    console.log(media);
+  };
+  const getPermission = async () => {
+    const permission = await MediaLibrary.getPermissionsAsync();
+
+    console.log(permission);
+    if (permission.granted) {
+      getAudioFiles();
+    }
+    if (!permission.granted && permission.canAskAgain) {
+      const { status, canAskAgain } =
+        await MediaLibrary.requestPermissionsAsync();
+      if (status === "denied" && canAskAgain) {
+        getPermission();
+      }
+
+      if (status === "granted") {
+        //get audio files
+        getAudioFiles();
+      }
+
+      if (status === "denied" && !canAskAgain) {
+        Alert.alert(
+          "Permission required",
+          "Please grant the required permissions."
+        );
+      }
+    }
+  };
+
+  useEffect(() => {
+    getPermission();
+  }, []);
+
+  const getItem = (data: [{ filename: string; id: string }], index: number) =>
     data[index];
 
-  const getItemCount = (data: [{ name: string; key: string }]) => data.length;
+  const getItemCount = (data: [{ filename: string; id: string }]) =>
+    data.length;
 
   return (
     <VirtualizedList
       data={data}
       initialNumToRender={10}
-      renderItem={({ item }: { item: { name: string; key: string } }) => (
-        <SongListItem name={item.name} />
+      renderItem={({ item }: { item: { filename: string; id: string } }) => (
+        <SongListItem name={item.filename} />
       )}
       getItemCount={getItemCount}
       getItem={getItem}
-      keyExtractor={(item) => item.key}
+      keyExtractor={(item) => item.id}
     />
   );
 }
-
-const Separator = () => {
-  return (
-    <View style={{ height: 2, borderColor: "#ddd", borderWidth: 1 }}></View>
-  );
-};
