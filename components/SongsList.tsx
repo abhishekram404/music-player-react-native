@@ -59,9 +59,7 @@ export default function SongsList() {
     <VirtualizedList
       data={data}
       initialNumToRender={10}
-      renderItem={({ item }: { item: { filename: string; id: string } }) => (
-        <SongListItem name={item?.filename.split(".")[0]} />
-      )}
+      renderItem={({ item }) => <SongListItem item={item} />}
       getItemCount={getItemCount}
       getItem={getItem}
       keyExtractor={(item) => item.id}

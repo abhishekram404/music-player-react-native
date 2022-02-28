@@ -3,20 +3,35 @@ import {
   Text,
   StyleSheet,
   Image,
-  TouchableOpacity,
   TouchableHighlight,
 } from "react-native";
+import * as MediaLibrary from "expo-media-library";
 import React from "react";
+import { useContext } from "react";
+import PlayerContext from "../utils/PlayerContext";
 
-export default function SongListItem({ name }: { name: string }) {
+export default function SongListItem({ item }) {
+  // const getSongInfo = async ({ item }) => {
+  //   let res = await MediaLibrary.getAssetInfoAsync(item);
+  //   console.log(res);
+  // };
+
+  const { setActiveSong } = useContext(PlayerContext);
+
   return (
-    <TouchableHighlight activeOpacity={1} underlayColor="#000">
+    <TouchableHighlight
+      activeOpacity={1}
+      underlayColor="#ddd"
+      onPress={() => {
+        setActiveSong(item);
+      }}
+    >
       <View style={styles.songListItem}>
         <Image
           source={require("../assets/thumbnail.jpg")}
           style={styles.songThumbnail}
         />
-        <Text style={styles.songName}>{name}</Text>
+        <Text style={styles.songName}>{item.filename}</Text>
       </View>
     </TouchableHighlight>
   );

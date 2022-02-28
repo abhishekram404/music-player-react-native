@@ -1,12 +1,16 @@
 import { View, Text, StyleSheet, Image } from "react-native";
 import React from "react";
 import { MaterialIcons } from "@expo/vector-icons";
-import { Ionicons } from "@expo/vector-icons";
+import { useContext } from "react";
+import PlayerContext from "../utils/PlayerContext";
 export default function PlayerMin() {
+  const { activeSong } = useContext(PlayerContext);
   return (
     <View style={styles.playerMin}>
       <View style={styles.titleRow}>
-        <Text style={styles.title}>Five Feet Apart - Don't Give Up On Me</Text>
+        <Text style={styles.title}>
+          {activeSong && activeSong?.filename.split(".mp3")[0]}
+        </Text>
       </View>
       <View style={styles.controllerRow}>
         <Image
