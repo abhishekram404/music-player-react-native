@@ -1,15 +1,24 @@
-import { View, Text, StyleSheet, Image } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  TouchableHighlight,
+} from "react-native";
 import React from "react";
 
 export default function SongListItem({ name }: { name: string }) {
   return (
-    <View style={styles.songListItem}>
-      <Image
-        source={require("../assets/thumbnail.jpg")}
-        style={styles.songThumbnail}
-      />
-      <Text style={styles.songName}>{name}</Text>
-    </View>
+    <TouchableHighlight activeOpacity={1} underlayColor="#000">
+      <View style={styles.songListItem}>
+        <Image
+          source={require("../assets/thumbnail.jpg")}
+          style={styles.songThumbnail}
+        />
+        <Text style={styles.songName}>{name}</Text>
+      </View>
+    </TouchableHighlight>
   );
 }
 
@@ -29,6 +38,6 @@ const styles = StyleSheet.create({
   },
   songName: {
     fontWeight: "300",
-    fontSize: 18,
+    fontSize: 16,
   },
 });

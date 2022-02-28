@@ -14,7 +14,7 @@ export default function SongsList() {
       mediaType: "audio",
       first: media.totalCount,
     });
-    setData(media.assets);
+    setData(media.assets.filter((asset) => asset.duration > 20));
     console.log(media);
   };
   const getPermission = async () => {
@@ -60,7 +60,7 @@ export default function SongsList() {
       data={data}
       initialNumToRender={10}
       renderItem={({ item }: { item: { filename: string; id: string } }) => (
-        <SongListItem name={item.filename} />
+        <SongListItem name={item?.filename.split(".")[0]} />
       )}
       getItemCount={getItemCount}
       getItem={getItem}
