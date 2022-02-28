@@ -9,29 +9,42 @@ import * as MediaLibrary from "expo-media-library";
 import React from "react";
 import { useContext } from "react";
 import PlayerContext from "../utils/PlayerContext";
+import { useState } from "react";
+import { useEffect } from "react";
 
 export default function SongListItem({ item }) {
-  // const getSongInfo = async ({ item }) => {
-  //   let res = await MediaLibrary.getAssetInfoAsync(item);
-  //   console.log(res);
-  // };
+  const [isActive, setActive] = useState(false);
 
-  const { setActiveSong } = useContext(PlayerContext);
+  const { activeSong, setActiveSong } = useContext(PlayerContext);
+
+  const handlePress = async () => {
+    await setActiveSong(item);
+  };
+
+  useEffect(async () => {
+    (await activeSong.id) === item.id ? setActive(true) : setActive(false);
+    return () => setActive(false);
+  }, [activeSong]);
 
   return (
     <TouchableHighlight
       activeOpacity={1}
       underlayColor="#ddd"
-      onPress={() => {
-        setActiveSong(item);
-      }}
+      onPress={handlePress}
     >
       <View style={styles.songListItem}>
         <Image
           source={require("../assets/thumbnail.jpg")}
           style={styles.songThumbnail}
         />
-        <Text style={styles.songName}>{item.filename}</Text>
+        <Text
+          style={[
+            styles.songName,
+            isActive ? { color: "#8685EF" } : { color: "#000" },
+          ]}
+        >
+          {item.filename}
+        </Text>
       </View>
     </TouchableHighlight>
   );

@@ -1,10 +1,50 @@
 import { View, Text, StyleSheet, Image } from "react-native";
-import React from "react";
+import React, { useState } from "react";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useContext } from "react";
 import PlayerContext from "../utils/PlayerContext";
+import { Audio } from "expo-av";
+import { useEffect } from "react";
+import { useRef } from "react";
 export default function PlayerMin() {
   const { activeSong } = useContext(PlayerContext);
+  const [isPlaying, setPlaying] = useState(false);
+
+  const sound = useRef(new Audio.Sound());
+
+  const loadSong = async () => {
+    const status = await sound.current.getStatusAsync();
+
+    if (!status.isLoaded) {
+      return sound.current.loadAsync({ uri: activeSong.uri });
+    }
+  };
+
+  const playPause = async () => {
+    const status = await sound.current.getStatusAsync();
+
+    status.isPlaying
+      ? await sound.current.pauseAsync()
+      : await sound.current.playAsync();
+
+    setPlaying(!isPlaying);
+  };
+
+  useEffect(async () => {
+    const status = await sound.current.getStatusAsync();
+    if (status.isPlaying || status.isLoaded) {
+      await sound.current.pauseAsync();
+      await sound.current.unloadAsync();
+    }
+
+    await loadSong();
+    await sound.current.playAsync();
+    setPlaying(true);
+
+    return async () => {
+      await sound.current.unloadAsync();
+    };
+  }, [activeSong]);
   return (
     <View style={styles.playerMin}>
       <View style={styles.titleRow}>
@@ -24,12 +64,23 @@ export default function PlayerMin() {
             color="black"
             style={styles.icon}
           />
-          <MaterialIcons
-            name="play-arrow"
-            size={24}
-            color="black"
-            style={styles.icon}
-          />
+          {isPlaying ? (
+            <MaterialIcons
+              name="pause"
+              size={24}
+              color="black"
+              style={styles.icon}
+              onPress={playPause}
+            />
+          ) : (
+            <MaterialIcons
+              name="play-arrow"
+              size={24}
+              color="black"
+              style={styles.icon}
+              onPress={playPause}
+            />
+          )}
           <MaterialIcons
             name="skip-next"
             size={24}

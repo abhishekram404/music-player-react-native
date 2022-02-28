@@ -13,7 +13,7 @@ export default function App() {
       <View style={styles.container}>
         <AppBar />
         <SongsList />
-        <PlayerMin />
+        {activeSong && <PlayerMin />}
       </View>
     </PlayerContext.Provider>
   );
