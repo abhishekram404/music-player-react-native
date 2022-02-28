@@ -9,7 +9,7 @@ import { useRef } from "react";
 export default function PlayerMin() {
   const { activeSong } = useContext(PlayerContext);
   const [isPlaying, setPlaying] = useState(false);
-
+  const { songs, setActiveSong } = useContext(PlayerContext);
   const sound = useRef(new Audio.Sound());
 
   const loadSong = async () => {
@@ -18,6 +18,16 @@ export default function PlayerMin() {
     if (!status.isLoaded) {
       return sound.current.loadAsync({ uri: activeSong.uri });
     }
+  };
+
+  const nextSong = async () => {
+    const currentSongIndex = async () => await songs.indexOf(activeSong);
+    if ((await currentSongIndex()) === songs.length - 1) {
+      await setActiveSong(songs[0]);
+      return;
+    }
+    console.log(await currentSongIndex());
+    await setActiveSong(songs[(await currentSongIndex()) + 1]);
   };
 
   const playPause = async () => {
@@ -39,6 +49,7 @@ export default function PlayerMin() {
 
     await loadSong();
     await sound.current.playAsync();
+    console.log(await sound.current.getStatusAsync());
     setPlaying(true);
 
     return async () => {
@@ -86,6 +97,7 @@ export default function PlayerMin() {
             size={24}
             color="black"
             style={styles.icon}
+            onPress={nextSong}
           />
         </View>
       </View>

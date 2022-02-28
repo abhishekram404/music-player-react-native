@@ -7,9 +7,12 @@ import SongsList from "./components/SongsList";
 import PlayerContext from "./utils/PlayerContext";
 export default function App() {
   const [activeSong, setActiveSong] = useState(undefined);
+  const [songs, setSongs] = useState([]);
   console.log(activeSong);
   return (
-    <PlayerContext.Provider value={{ activeSong, setActiveSong }}>
+    <PlayerContext.Provider
+      value={{ activeSong, setActiveSong, songs, setSongs }}
+    >
       <View style={styles.container}>
         <AppBar />
         <SongsList />

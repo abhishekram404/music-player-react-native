@@ -1,11 +1,13 @@
 import { View, Text, VirtualizedList, Alert } from "react-native";
 import React, { useEffect, useState } from "react";
-import uuid from "react-native-uuid";
 import SongListItem from "./SongListItem";
 import * as MediaLibrary from "expo-media-library";
+import { useContext } from "react";
+import PlayerContext from "../utils/PlayerContext";
 
 export default function SongsList() {
   const [data, setData] = useState([]);
+  const { setSongs } = useContext(PlayerContext);
 
   const getAudioFiles = async () => {
     let media = await MediaLibrary.getAssetsAsync({ mediaType: "audio" });
@@ -14,7 +16,10 @@ export default function SongsList() {
       mediaType: "audio",
       first: media.totalCount,
     });
-    setData(media.assets.filter((asset) => asset.duration > 20));
+    let medias = await media.assets.filter((asset) => asset.duration > 20);
+    setData(medias);
+    setSongs(medias);
+
     console.log(media);
   };
   const getPermission = async () => {

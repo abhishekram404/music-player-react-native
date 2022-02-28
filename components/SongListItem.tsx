@@ -22,7 +22,9 @@ export default function SongListItem({ item }) {
   };
 
   useEffect(async () => {
-    (await activeSong.id) === item.id ? setActive(true) : setActive(false);
+    activeSong && (await activeSong.id) === item.id
+      ? setActive(true)
+      : setActive(false);
     return () => setActive(false);
   }, [activeSong]);
 
