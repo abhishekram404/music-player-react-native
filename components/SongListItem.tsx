@@ -11,6 +11,7 @@ import { useContext } from "react";
 import PlayerContext from "../utils/PlayerContext";
 import { useState } from "react";
 import { useEffect } from "react";
+import { MaterialIcons } from "@expo/vector-icons";
 
 export default function SongListItem({ item }) {
   const [isActive, setActive] = useState(false);
@@ -35,17 +36,35 @@ export default function SongListItem({ item }) {
       onPress={handlePress}
     >
       <View style={styles.songListItem}>
-        <Image
+        {/* <Image
           source={require("../assets/thumbnail.jpg")}
           style={styles.songThumbnail}
-        />
+        /> */}
+        <View
+          style={[
+            styles.thumbnailContainer,
+            isActive
+              ? { backgroundColor: "#8685EF" }
+              : { backgroundColor: "#E3E0F3" },
+          ]}
+        >
+          <MaterialIcons
+            name="music-note"
+            size={24}
+            color="black"
+            style={[
+              styles.songThumbnail,
+              isActive ? { color: "#fff" } : { color: "#000" },
+            ]}
+          />
+        </View>
         <Text
           style={[
             styles.songName,
             isActive ? { color: "#8685EF" } : { color: "#000" },
           ]}
         >
-          {item.filename}
+          {item.filename.split(".mp3")[0]}
         </Text>
       </View>
     </TouchableHighlight>
@@ -60,12 +79,22 @@ const styles = StyleSheet.create({
     borderBottomColor: "#eee",
     borderBottomWidth: 1,
   },
-  songThumbnail: {
-    width: 40,
-    height: 40,
+  thumbnailContainer: {
+    backgroundColor: "#E3E0F3",
     borderRadius: 50,
+    justifyContent: "center",
+    alignItems: "center",
+    width: 45,
+    height: 45,
     marginRight: 20,
   },
+  songThumbnail: {
+    // width: 40,
+    // height: 40,
+    // borderRadius: 50,
+    // padding: 10,
+  },
+
   songName: {
     fontWeight: "300",
     fontSize: 16,
