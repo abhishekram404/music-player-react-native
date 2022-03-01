@@ -123,7 +123,9 @@ export default function PlayerMin() {
                 styles.progressIndicator,
                 { width: `${progressBarWidth}%` },
               ]}
-            ></View>
+            >
+              <View style={styles.progressIndicatorDot}></View>
+            </View>
           </View>
           <Text style={styles.progressBarEnd}>{duration}</Text>
         </View>
@@ -230,12 +232,21 @@ const styles = StyleSheet.create({
     height: 2,
     backgroundColor: "#fff",
     marginHorizontal: 10,
-    overflow: "hidden",
+    // overflow: "hidden",
   },
   progressBarEnd: {},
   progressIndicator: {
     height: 2,
     width: "5%",
     backgroundColor: "#474554",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-end",
+  },
+  progressIndicatorDot: {
+    height: 8,
+    width: 8,
+    backgroundColor: "#000",
+    borderRadius: 50,
   },
 });
