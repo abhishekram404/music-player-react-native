@@ -70,9 +70,17 @@ export default function PlayerMin() {
     );
 
     setDuration(millisToMinutesAndSeconds(await getDuration(soundInstance)));
-    soundInstance.playAsync();
 
+    soundInstance.playAsync();
     setPlaying(true);
+    setInterval(async () => {
+      setProgress(millisToMinutesAndSeconds(await getProgress(soundInstance)));
+      setProgressBarWidth(
+        ((await getProgress(soundInstance)) /
+          (await getDuration(soundInstance))) *
+          100
+      );
+    }, 1000);
 
     return async () => {
       await pauseAndUnload(soundInstance);
@@ -94,34 +102,10 @@ export default function PlayerMin() {
     })();
   }, [activeSong]);
 
-  // useEffect(async () => {
-  //   let interval = setInterval(async () => {
-  //     let status = await sound.current.getStatusAsync();
-  //     await setProgressBarWidth(
-  //       ((await status.positionMillis) / (await status.durationMillis)) * 100
-  //     );
-  //     console.log(progressBarWidth);
-  //     setProgress(millisToMinutesAndSeconds(status.positionMillis));
-  //   }, 1000);
-
-  //   return () => {
-  //     setProgress(0);
-  //     setProgressBarWidth(0);
-  //     clearInterval(interval);
-  //   };
-  // });
-
-  // useEffect(async () => {
-  //   let status = await sound.current.getStatusAsync();
-  //   setDuration(await millisToMinutesAndSeconds(await status.durationMillis));
-  // }, []);
-
-  // useEffect(async () => {
-  //   const status = await sound.current.getStatusAsync();
-  //   await setDuration(
-  //     await millisToMinutesAndSeconds(await status.durationMillis)
-  //   );
-  // });
+  const getProgress = async (soundInstance) => {
+    const status = await soundInstance.getStatusAsync();
+    return status.positionMillis;
+  };
 
   return (
     <View style={styles.playerMin}>
@@ -246,6 +230,7 @@ const styles = StyleSheet.create({
     height: 2,
     backgroundColor: "#fff",
     marginHorizontal: 10,
+    overflow: "hidden",
   },
   progressBarEnd: {},
   progressIndicator: {
