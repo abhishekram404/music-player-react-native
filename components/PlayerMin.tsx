@@ -64,9 +64,14 @@ export default function PlayerMin() {
 
     await soundInstance.loadAsync(
       { uri: activeSong.uri },
-      { shouldPlay: true },
+      // { shouldPlay: true },
+      {},
       true
     );
+
+    setDuration(millisToMinutesAndSeconds(await getDuration(soundInstance)));
+    soundInstance.playAsync();
+
     setPlaying(true);
 
     return async () => {
@@ -74,8 +79,19 @@ export default function PlayerMin() {
     };
   };
 
+  // const getCurrentProgress = async(soundInstance) => {
+  //   const status =  await soundInstance.getStatusAsync()
+  // }
+
+  const getDuration = async (soundInstance) => {
+    const status = await soundInstance.getStatusAsync();
+    return status.durationMillis;
+  };
+
   useEffect(() => {
-    loadAndPlay(sound.current);
+    (async () => {
+      await loadAndPlay(sound.current);
+    })();
   }, [activeSong]);
 
   // useEffect(async () => {
