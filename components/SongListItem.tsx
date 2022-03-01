@@ -36,10 +36,6 @@ export default function SongListItem({ item }) {
       onPress={handlePress}
     >
       <View style={styles.songListItem}>
-        {/* <Image
-          source={require("../assets/thumbnail.jpg")}
-          style={styles.songThumbnail}
-        /> */}
         <View
           style={[
             styles.thumbnailContainer,
