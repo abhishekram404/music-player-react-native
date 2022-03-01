@@ -1,10 +1,16 @@
-import { View, Text, VirtualizedList, Alert } from "react-native";
-import React, { useEffect, useState } from "react";
-import SongListItem from "./SongListItem";
+import {
+  View,
+  Text,
+  VirtualizedList,
+  Alert,
+  ActivityIndicator,
+} from "react-native";
+import React, { useEffect, useState, Suspense } from "react";
+// import SongListItem from "./SongListItem";
 import * as MediaLibrary from "expo-media-library";
 import { useContext } from "react";
 import PlayerContext from "../utils/PlayerContext";
-
+const SongListItem = React.lazy(() => import("./SongListItem"));
 export default function SongsList() {
   const [data, setData] = useState([]);
   const { setSongs } = useContext(PlayerContext);
@@ -19,13 +25,10 @@ export default function SongsList() {
     let medias = await media.assets.filter((asset) => asset.duration > 20);
     setData(medias);
     setSongs(medias);
-
-    console.log(media);
   };
   const getPermission = async () => {
     const permission = await MediaLibrary.getPermissionsAsync();
 
-    console.log(permission);
     if (permission.granted) {
       getAudioFiles();
     }
@@ -64,7 +67,30 @@ export default function SongsList() {
     <VirtualizedList
       data={data}
       initialNumToRender={10}
-      renderItem={({ item }) => <SongListItem item={item} />}
+      renderItem={({ item }) => (
+        <Suspense
+          fallback={
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: 20,
+                borderBottomColor: "#eee",
+                borderBottomWidth: 1,
+              }}
+            >
+              <ActivityIndicator
+                animating={true}
+                size="small"
+                color="#8685EF"
+              />
+            </View>
+          }
+        >
+          <SongListItem item={item} />
+        </Suspense>
+      )}
       getItemCount={getItemCount}
       getItem={getItem}
       keyExtractor={(item) => item.id}

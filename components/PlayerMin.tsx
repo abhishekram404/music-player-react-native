@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Image } from "react-native";
+import { View, Text, StyleSheet, Image, Pressable } from "react-native";
 import React, { useState } from "react";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useContext } from "react";
@@ -10,15 +10,10 @@ export default function PlayerMin() {
   const { activeSong } = useContext(PlayerContext);
   const [isPlaying, setPlaying] = useState(false);
   const { songs, setActiveSong } = useContext(PlayerContext);
+  const [duration, setDuration] = useState();
+  const [progress, setProgress] = useState();
+  const [progressBarWidth, setProgressBarWidth] = useState(0);
   const sound = useRef(new Audio.Sound());
-
-  const loadSong = async () => {
-    const status = await sound.current.getStatusAsync();
-
-    if (!status.isLoaded) {
-      return sound.current.loadAsync({ uri: activeSong.uri });
-    }
-  };
 
   const nextSong = async () => {
     const currentSongIndex = async () => await songs.indexOf(activeSong);
@@ -26,7 +21,6 @@ export default function PlayerMin() {
       await setActiveSong(songs[0]);
       return;
     }
-    console.log(await currentSongIndex());
     await setActiveSong(songs[(await currentSongIndex()) + 1]);
   };
 
@@ -49,23 +43,70 @@ export default function PlayerMin() {
 
     setPlaying(!isPlaying);
   };
+  function millisToMinutesAndSeconds(millis = 0) {
+    var minutes = Math.floor(millis / 60000);
+    var seconds = ((millis % 60000) / 1000).toFixed(0);
+    return seconds == 60
+      ? minutes + 1 + ":00"
+      : minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
+  }
 
-  useEffect(async () => {
-    const status = await sound.current.getStatusAsync();
-    if (status.isPlaying || status.isLoaded) {
-      await sound.current.pauseAsync();
-      await sound.current.unloadAsync();
+  const pauseAndUnload = async (soundInstance) => {
+    await soundInstance.pauseAsync();
+    await soundInstance.unloadAsync();
+  };
+
+  const loadAndPlay = async (soundInstance) => {
+    const status = await soundInstance.getStatusAsync();
+    if (status.isLoaded && status.isPlaying) {
+      await pauseAndUnload(soundInstance);
     }
 
-    await loadSong();
-    await sound.current.playAsync();
-    console.log(await sound.current.getStatusAsync());
+    await soundInstance.loadAsync(
+      { uri: activeSong.uri },
+      { shouldPlay: true },
+      true
+    );
     setPlaying(true);
 
     return async () => {
-      await sound.current.unloadAsync();
+      await pauseAndUnload(soundInstance);
     };
+  };
+
+  useEffect(() => {
+    loadAndPlay(sound.current);
   }, [activeSong]);
+
+  // useEffect(async () => {
+  //   let interval = setInterval(async () => {
+  //     let status = await sound.current.getStatusAsync();
+  //     await setProgressBarWidth(
+  //       ((await status.positionMillis) / (await status.durationMillis)) * 100
+  //     );
+  //     console.log(progressBarWidth);
+  //     setProgress(millisToMinutesAndSeconds(status.positionMillis));
+  //   }, 1000);
+
+  //   return () => {
+  //     setProgress(0);
+  //     setProgressBarWidth(0);
+  //     clearInterval(interval);
+  //   };
+  // });
+
+  // useEffect(async () => {
+  //   let status = await sound.current.getStatusAsync();
+  //   setDuration(await millisToMinutesAndSeconds(await status.durationMillis));
+  // }, []);
+
+  // useEffect(async () => {
+  //   const status = await sound.current.getStatusAsync();
+  //   await setDuration(
+  //     await millisToMinutesAndSeconds(await status.durationMillis)
+  //   );
+  // });
+
   return (
     <View style={styles.playerMin}>
       <View style={styles.titleRow}>
@@ -73,6 +114,20 @@ export default function PlayerMin() {
           {activeSong && activeSong?.filename.split(".mp3")[0]}
         </Text>
       </View>
+      <Pressable>
+        <View style={styles.progressBarRow}>
+          <Text style={styles.progressBarStart}>{progress}</Text>
+          <View style={styles.progressBar}>
+            <View
+              style={[
+                styles.progressIndicator,
+                { width: `${progressBarWidth}%` },
+              ]}
+            ></View>
+          </View>
+          <Text style={styles.progressBarEnd}>{duration}</Text>
+        </View>
+      </Pressable>
       <View style={styles.controllerRow}>
         <Image
           source={require("../assets/thumbnail.jpg")}
@@ -162,5 +217,24 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 35,
     marginHorizontal: 25,
+  },
+
+  progressBarRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 15,
+  },
+  progressBarStart: {},
+  progressBar: {
+    flex: 1,
+    height: 2,
+    backgroundColor: "#fff",
+    marginHorizontal: 10,
+  },
+  progressBarEnd: {},
+  progressIndicator: {
+    height: 2,
+    width: "5%",
+    backgroundColor: "#474554",
   },
 });

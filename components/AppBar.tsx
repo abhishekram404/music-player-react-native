@@ -16,7 +16,6 @@ export default function AppBar() {
         <TouchableHighlight
           activeOpacity={0.6}
           underlayColor="#6B22F920"
-          onPress={() => console.log("pressed")}
           style={{ borderRadius: 50, padding: 10 }}
         >
           <Octicons name="gear" size={24} color="#8685EF" />
