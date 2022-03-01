@@ -5,17 +5,19 @@ import { useContext } from "react";
 import PlayerContext from "../utils/PlayerContext";
 import { Audio } from "expo-av";
 import { useEffect } from "react";
+import Slider from "@react-native-community/slider";
 import { useRef } from "react";
 export default function PlayerMin() {
   const { activeSong } = useContext(PlayerContext);
   const [isPlaying, setPlaying] = useState(false);
   const { songs, setActiveSong } = useContext(PlayerContext);
-  const [duration, setDuration] = useState();
-  const [progress, setProgress] = useState();
-  const [progressBarWidth, setProgressBarWidth] = useState(0);
+  const [duration, setDuration] = useState<string>();
+  const [progress, setProgress] = useState<string>();
+  const [progressBarWidth, setProgressBarWidth] = useState<number>(0);
   const sound = useRef(new Audio.Sound());
 
   const nextSong = async () => {
+    await pauseAndUnload(sound.current);
     const currentSongIndex = async () => await songs.indexOf(activeSong);
     if ((await currentSongIndex()) === songs.length - 1) {
       await setActiveSong(songs[0]);
@@ -50,7 +52,6 @@ export default function PlayerMin() {
       ? minutes + 1 + ":00"
       : minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
   }
-
   const pauseAndUnload = async (soundInstance) => {
     await soundInstance.pauseAsync();
     await soundInstance.unloadAsync();
@@ -73,23 +74,25 @@ export default function PlayerMin() {
 
     soundInstance.playAsync();
     setPlaying(true);
-    setInterval(async () => {
-      setProgress(millisToMinutesAndSeconds(await getProgress(soundInstance)));
-      setProgressBarWidth(
-        ((await getProgress(soundInstance)) /
-          (await getDuration(soundInstance))) *
-          100
-      );
-    }, 1000);
 
     return async () => {
       await pauseAndUnload(soundInstance);
     };
   };
 
-  // const getCurrentProgress = async(soundInstance) => {
-  //   const status =  await soundInstance.getStatusAsync()
-  // }
+  sound.current.setOnPlaybackStatusUpdate((playbackStatus) => {
+    if (playbackStatus.didJustFinish) {
+      //  sound.current.unloadAsync();
+      nextSong();
+      return;
+    }
+    if (playbackStatus.isLoaded) {
+      setProgress(millisToMinutesAndSeconds(playbackStatus.positionMillis));
+      setProgressBarWidth(
+        (playbackStatus.positionMillis / playbackStatus.durationMillis) * 100
+      );
+    }
+  });
 
   const getDuration = async (soundInstance) => {
     const status = await soundInstance.getStatusAsync();
@@ -97,14 +100,25 @@ export default function PlayerMin() {
   };
 
   useEffect(() => {
-    (async () => {
-      await loadAndPlay(sound.current);
-    })();
+    let isMounted = true;
+    if (isMounted) {
+      (async () => {
+        await loadAndPlay(sound.current);
+      })();
+    }
+
+    return () => {
+      isMounted = false;
+      if (sound.current._loaded) {
+        pauseAndUnload(sound.current);
+      }
+    };
   }, [activeSong]);
 
-  const getProgress = async (soundInstance) => {
-    const status = await soundInstance.getStatusAsync();
-    return status.positionMillis;
+  const setSeek = async (percValue) => {
+    await sound.current.setPositionAsync(
+      (percValue / 100) * (await getDuration(sound.current))
+    );
   };
 
   return (
@@ -117,7 +131,15 @@ export default function PlayerMin() {
       <Pressable>
         <View style={styles.progressBarRow}>
           <Text style={styles.progressBarStart}>{progress}</Text>
-          <View style={styles.progressBar}>
+          <Slider
+            style={styles.progressBar}
+            minimumValue={0}
+            maximumValue={100}
+            value={progressBarWidth ? progressBarWidth : 0}
+            tapToSeek={true}
+            onSlidingComplete={(value) => setSeek(value)}
+          />
+          {/* <View style={styles.progressBar}>
             <View
               style={[
                 styles.progressIndicator,
@@ -126,7 +148,7 @@ export default function PlayerMin() {
             >
               <View style={styles.progressIndicatorDot}></View>
             </View>
-          </View>
+          </View> */}
           <Text style={styles.progressBarEnd}>{duration}</Text>
         </View>
       </Pressable>
@@ -229,15 +251,18 @@ const styles = StyleSheet.create({
   progressBarStart: {},
   progressBar: {
     flex: 1,
-    height: 2,
-    backgroundColor: "#fff",
+    // height: 10,
+
+    // backgroundColor: "#fff",
     marginHorizontal: 10,
+
+    // padding: 0,
     // overflow: "hidden",
   },
   progressBarEnd: {},
   progressIndicator: {
     height: 2,
-    width: "5%",
+    width: "0%",
     backgroundColor: "#474554",
     flexDirection: "row",
     alignItems: "center",
