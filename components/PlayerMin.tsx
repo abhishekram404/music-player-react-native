@@ -14,6 +14,7 @@ export default function PlayerMin() {
   const [duration, setDuration] = useState<string>();
   const [progress, setProgress] = useState<string>();
   const [progressBarWidth, setProgressBarWidth] = useState<number>(0);
+  // const [isLoaded, setLoaded] = useState(false);
   const sound = useRef(new Audio.Sound());
 
   const nextSong = async () => {
@@ -80,18 +81,23 @@ export default function PlayerMin() {
     };
   };
 
-  sound.current.setOnPlaybackStatusUpdate((playbackStatus) => {
-    if (playbackStatus.didJustFinish) {
-      //  sound.current.unloadAsync();
-      nextSong();
-      return;
-    }
-    if (playbackStatus.isLoaded) {
-      setProgress(millisToMinutesAndSeconds(playbackStatus.positionMillis));
-      setProgressBarWidth(
-        (playbackStatus.positionMillis / playbackStatus.durationMillis) * 100
-      );
-    }
+  useEffect(() => {
+    sound.current.setOnPlaybackStatusUpdate((playbackStatus) => {
+      if (playbackStatus.didJustFinish) {
+        nextSong();
+        return;
+      }
+      // if (!playbackStatus.isLoaded) {
+      //   setLoaded(false);
+      // }
+      if (playbackStatus.isLoaded) {
+        // setLoaded(true);
+        setProgress(millisToMinutesAndSeconds(playbackStatus.positionMillis));
+        setProgressBarWidth(
+          (playbackStatus.positionMillis / playbackStatus.durationMillis) * 100
+        );
+      }
+    });
   });
 
   const getDuration = async (soundInstance) => {
@@ -139,16 +145,7 @@ export default function PlayerMin() {
             tapToSeek={true}
             onSlidingComplete={(value) => setSeek(value)}
           />
-          {/* <View style={styles.progressBar}>
-            <View
-              style={[
-                styles.progressIndicator,
-                { width: `${progressBarWidth}%` },
-              ]}
-            >
-              <View style={styles.progressIndicatorDot}></View>
-            </View>
-          </View> */}
+
           <Text style={styles.progressBarEnd}>{duration}</Text>
         </View>
       </Pressable>
@@ -198,15 +195,8 @@ export default function PlayerMin() {
 const styles = StyleSheet.create({
   playerMin: {
     padding: 20,
-    // height: 150,
-    // elevation: 55,
     backgroundColor: "#8685EF",
     borderTopRightRadius: 10,
-    borderTopLeftRadius: 10,
-    // flexDirection: "row",
-    // alignItems: "center",
-    // justifyContent: "center",
-    // position: "relative",
   },
   titleRow: {
     alignItems: "center",
@@ -251,27 +241,6 @@ const styles = StyleSheet.create({
   progressBarStart: {},
   progressBar: {
     flex: 1,
-    // height: 10,
-
-    // backgroundColor: "#fff",
     marginHorizontal: 10,
-
-    // padding: 0,
-    // overflow: "hidden",
-  },
-  progressBarEnd: {},
-  progressIndicator: {
-    height: 2,
-    width: "0%",
-    backgroundColor: "#474554",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "flex-end",
-  },
-  progressIndicatorDot: {
-    height: 8,
-    width: 8,
-    backgroundColor: "#000",
-    borderRadius: 50,
   },
 });
